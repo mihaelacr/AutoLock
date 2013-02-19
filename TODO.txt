@@ -1,7 +1,6 @@
-Make it check how much battery the laptop has and shut down if battery life is smaller
-than given threshold
-
 Properly set default action from recovring from locked screen
+
+See what happens when the person is too far away
 
 See the person walking out of the frame (gradually) Charlie suggestion
 
