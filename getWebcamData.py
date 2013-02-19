@@ -21,6 +21,7 @@ parser.add_argument("--runWithDischargingBattery",
 
 
 WINDOW_NAME = "AutoLock"
+TIME_BETWEEN_FACE_CHECKS = 1
 
 args = parser.parse_args()
 displayCam = args.displayWebcam
@@ -45,7 +46,7 @@ def lockWhenFaceNotDetected(timeUntilLock, display=False):
       while not batteryStatus.isCharging():
         pass
     currentTime = time.time()
-    if (currentTime - lastTimeChecked > 1):
+    if (currentTime - lastTimeChecked > TIME_BETWEEN_FACE_CHECKS):
       frame = cv.QueryFrame(capture)
       if display:
         cv.ShowImage(WINDOW_NAME, frame)
