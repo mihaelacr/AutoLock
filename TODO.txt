@@ -1,11 +1,11 @@
-Depenencies:xlockmore
-
 Make it check how much battery the laptop has and shut down if battery life is smaller
 than given threshold
 
+Properly set default action from recovring from locked screen
 
 See the person walking out of the frame (gradually) Charlie suggestion
 
 Make it compatible for Windows and Mac as well
 Locking screen from Windows:
 http://www.blog.pythonlibrary.org/2010/02/09/enabling-screen-locking-with-python/
+
