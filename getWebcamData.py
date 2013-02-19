@@ -27,44 +27,55 @@ displayCam = args.displayWebcam
 timeUntilLock = args.timeUntilLock
 runWithDischargingBattery = args.runWithDischargingBattery
 
-def getCameraIndex():
-  for i in xrange(5):
-    capture = cv.CaptureFromCAM(i)
-    if capture:
-      return i
+def getCameraCapture():
+  # -1 is supposed to detected any webcam connected to the device
+  return cv.CaptureFromCAM(-1)
 
-
-def lockWhenFaceNotDetected(display=False):
+def lockWhenFaceNotDetected(timeUntilLock, display=False):
   if display:
     cv.NamedWindow(WINDOW_NAME, cv.CV_WINDOW_AUTOSIZE)
-  capture = cv.CaptureFromCAM(getCameraIndex())
 
+  capture = getCameraCapture()
   lastTimeDetected = time.time()
+  lastTimeChecked = time.time()
   while True:
-    frame = cv.QueryFrame(capture)
-    if display:
-      cv.ShowImage(WINDOW_NAME, frame)
-    faces = getFaces(frame)
-    if faces:
-      lastTimeDetected = time.time()
-      for f in faces:
-        print f
-    else:
-      if (time.time() - lastTimeDetected > timeUntilLock):
-        print "no face found, locking screen"
-        lockScreen.lockScreen()
-    drawFaces(faces, frame)
-    cv.SaveImage("withDetected.jpg", frame)
-    cv.WaitKey(10)
-    # time.sleep(0.5)
+    # Unless the user specified otherwise, do not record while machine is not
+    # not charging
+    if not runWithDischargingBattery:
+      while not batteryStatus.isCharging():
+        pass
+    currentTime = time.time()
+    if (currentTime - lastTimeChecked > 1):
+      frame = cv.QueryFrame(capture)
+      if display:
+        cv.ShowImage(WINDOW_NAME, frame)
+      faces = getFaces(frame)
+      if faces:
+        lastTimeDetected = currentTime
+      else:
+        if (time.time() - lastTimeDetected > timeUntilLock):
+          print "no face found, locking screen"
+          lockScreen.lockScreen()
+      drawFaces(faces, frame)
+      cv.WaitKey(10)
+      # time.sleep(0.5)
 
 
 def main():
-  if batteryStatus.isCharging() or runWithDischargingBattery:
+  global timeUntilLock
+  if batteryStatus.isCharging or runWithDischargingBattery:
     if runWithDischargingBattery:
       print "You choose to run AutoLock with your laptop not plugged in"
       print "Be aware of your battery"
-    lockWhenFaceNotDetected(displayCam)
+    if timeUntilLock < 1:
+      print ("timeUntilLock has to be a positive integer, as it represents"
+             "the number of seconds since a face was detected to the time the "
+             "screen gets locked")
+      print "Defaulting to %d seconds" %(DEFAULT_TIME_UNTIL_LOCK)
+      timeUntilLock = DEFAULT_TIME_UNTIL_LOCK
+    lockWhenFaceNotDetected(timeUntilLock, displayCam)
+  else:
+    print "Your machine is not charging, AutoLock will not execute"
 
 if __name__ == '__main__':
   main()
