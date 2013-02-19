@@ -17,6 +17,7 @@ def getFaces(image):
   return detectedFaces
 
 def drawFaces(faces, image):
+  # n is the number of neighbours which are used to create the face
   for (x, y, w, h), n in faces:
     cv.Rectangle(image, (x,y), (x + w, y + h), cv.RGB(255, 0, 0), thickness=5)
 
