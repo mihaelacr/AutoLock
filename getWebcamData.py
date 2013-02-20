@@ -35,17 +35,17 @@ runWithDischargingBattery = args.runWithDischargingBattery
 
 # When user presses Control-C, gracefully exit program, without
 def signal_handler(signal, frame):
-  print 'You pressed Ctrl+C!'
+  print "You pressed Ctrl+C!"
   print "AutoLock will terminate."
   sys.exit(0)
 
 signal.signal(signal.SIGINT, signal_handler)
 
 
-
 def getCameraCapture():
+  with ignoreoutput.suppress_stdout_stderr():
   # -1 is supposed to detected any webcam connected to the device
-  return cv.CaptureFromCAM(-1)
+    return cv.CaptureFromCAM(-1)
 
 
 def lockWhenFaceNotDetected(timeUntilLock, display=False):
@@ -94,6 +94,7 @@ def main():
     lockWhenFaceNotDetected(timeUntilLock, displayCam)
   else:
     print "Your machine is not charging, AutoLock will not execute"
+
 
 if __name__ == '__main__':
   main()
