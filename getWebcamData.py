@@ -13,7 +13,7 @@ import lockScreen
 
 DEFAULT_TIME_UNTIL_LOCK = 5
 WINDOW_NAME = "AutoLock"
-TIME_BETWEEN_FACE_CHECKS = 1
+TIME_BETWEEN_FACE_CHECKS = 0.3
 
 parser = argparse.ArgumentParser(description=("Automatically lock your screen "
                                               "when not inin range"))
