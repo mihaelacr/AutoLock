@@ -1,12 +1,14 @@
 import argparse
 import cv
-import time
 import signal
 import sys
+import time
+
 
 from faceRecognition import *
-import lockScreen
 import batteryStatus
+import ignoreoutput
+import lockScreen
 
 
 DEFAULT_TIME_UNTIL_LOCK = 5
