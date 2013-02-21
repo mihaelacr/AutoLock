@@ -17,14 +17,14 @@ TIME_BETWEEN_FACE_CHECKS = 0.1
 
 parser = argparse.ArgumentParser(description=("Automatically lock your screen "
                                               "when not inin range"))
-parser.add_argument("-timeUntilLock", type=int, default=DEFAULT_TIME_UNTIL_LOCK,
-                      help=("time in seconds since the last time a face is detected"
-                           "to the time the screen is locked"))
-parser.add_argument("--displayWebcam",
-                      help="determies if the image from the webcam is displayed")
-parser.add_argument("--runWithDischargingBattery",
+parser.add_argument('--displayWebcam', action='store_const', const=True,
+                    help="determies if the image from the webcam is displayed")
+parser.add_argument("--runWithDischargingBattery", action='store_const', const=True,
                       help=("if this flag is specified, the program will run even"
                             "when the battery is discharging"))
+parser.add_argument("-timeUntilLock", type=int, default=DEFAULT_TIME_UNTIL_LOCK,
+                    help=("time in seconds since the last time a face is detected"
+                          "to the time the screen is locked"))
 
 
 args = parser.parse_args()
@@ -35,7 +35,6 @@ runWithDischargingBattery = args.runWithDischargingBattery
 
 # When user presses Control-C, gracefully exit program, without
 def signal_handler(signal, frame):
-  print "You pressed Ctrl+C!"
   print "AutoLock will terminate."
   sys.exit(0)
 
