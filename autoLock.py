@@ -40,8 +40,16 @@ timeUntilLock = args.timeUntilLock
 runWithDischargingBattery = args.runWithDischargingBattery
 frequency = args.frequency
 
+if frequency >= timeUntilLock:
+  print ("The time between face detection checks is bigger than the time "
+         "until lock. This would result in locking the screen regardless "
+         "of someone's presence in front of the screen.")
+  print ("As a consequence, defaulting the time between face checks "
+         "to half of the time until the screen is locked when no face is detected.")
+  frequency = timeUntilLock / 2
 
-# When user presses Control-C, gracefully exit program, without
+
+# When user presses Control-C, gracefully exit program
 def signal_handler(signal, frame):
   print "AutoLock will terminate."
   sys.exit(0)
