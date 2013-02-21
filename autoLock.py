@@ -73,8 +73,10 @@ def lockWhenFaceNotDetected(timeUntilLock, display=False):
     cv.NamedWindow(WINDOW_NAME, cv.CV_WINDOW_AUTOSIZE)
 
   capture = getCameraCapture()
-  lastTimeDetected = time.time()
-  lastTimeChecked = time.time()
+  currentTime = time.time()
+  lastTimeDetected = currentTime
+  lastTimeChecked = currentTime - frequency
+  lastTimeLocked = currentTime - minTimeBetweenLocks
 
   while True:
     # Unless the user specified otherwise, do not record while machine is not
