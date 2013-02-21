@@ -24,13 +24,21 @@ parser.add_argument("--runWithDischargingBattery", action='store_const', const=T
                             "when the battery is discharging"))
 parser.add_argument("-timeUntilLock", type=int, default=DEFAULT_TIME_UNTIL_LOCK,
                     help=("time in seconds since the last time a face is detected"
-                          "to the time the screen is locked"))
+                          "to the time the screen is locked. "
+                          "Default value %d seconds." %DEFAULT_TIME_UNTIL_LOCK))
+parser.add_argument("-frequency", type=float, default=TIME_BETWEEN_FACE_CHECKS,
+                    help=("time in seconds between face checks. Note that a small"
+                          "number increases CPU usage but gives more accuracy."
+                          "A big number might imply that the screen locks, "
+                          "even though you are in front of the computer."
+                          "Default value %f seconds" %TIME_BETWEEN_FACE_CHECKS))
 
 
 args = parser.parse_args()
 displayCam = args.displayWebcam
 timeUntilLock = args.timeUntilLock
 runWithDischargingBattery = args.runWithDischargingBattery
+frequency = args.frequency
 
 
 # When user presses Control-C, gracefully exit program, without
@@ -62,7 +70,7 @@ def lockWhenFaceNotDetected(timeUntilLock, display=False):
       while not batteryStatus.isCharging():
         pass
     currentTime = time.time()
-    if (currentTime - lastTimeChecked > TIME_BETWEEN_FACE_CHECKS):
+    if (currentTime - lastTimeChecked > frequency):
       frame = cv.QueryFrame(capture)
       if display:
         cv.ShowImage(WINDOW_NAME, frame)
