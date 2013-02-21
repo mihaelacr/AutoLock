@@ -14,6 +14,7 @@ import lockScreen
 DEFAULT_TIME_UNTIL_LOCK = 10
 WINDOW_NAME = "AutoLock"
 TIME_BETWEEN_FACE_CHECKS = 0.1
+TIME_BETWEEN_LOCKS = 100
 
 parser = argparse.ArgumentParser(description=("Automatically lock your screen "
                                               "when not inin range"))
@@ -23,22 +24,26 @@ parser.add_argument("--runWithDischargingBattery", action='store_const', const=T
                       help=("if this flag is specified, the program will run even"
                             "when the battery is discharging"))
 parser.add_argument("-timeUntilLock", type=int, default=DEFAULT_TIME_UNTIL_LOCK,
-                    help=("time in seconds since the last time a face is detected"
+                    help=("Time in seconds since the last time a face is detected"
                           "to the time the screen is locked. "
                           "Default value %d seconds." %DEFAULT_TIME_UNTIL_LOCK))
 parser.add_argument("-frequency", type=float, default=TIME_BETWEEN_FACE_CHECKS,
-                    help=("time in seconds between face checks. Note that a small"
+                    help=("Time in seconds between face checks. Note that a small"
                           "number increases CPU usage but gives more accuracy."
                           "A big number might imply that the screen locks, "
-                          "even though you are in front of the computer."
+                          "even though you are in front of the computer. "
                           "Default value %f seconds" %TIME_BETWEEN_FACE_CHECKS))
+parser.add_argument("-minTimeBetweenLocks", type=float, default=TIME_BETWEEN_LOCKS,
+                    help=("Minimal time in seconds between screen locks. "
+                          "Default value %f seconds" %TIME_BETWEEN_LOCKS))
 
 
 args = parser.parse_args()
 displayCam = args.displayWebcam
-timeUntilLock = args.timeUntilLock
 runWithDischargingBattery = args.runWithDischargingBattery
+timeUntilLock = args.timeUntilLock
 frequency = args.frequency
+minTimeBetweenLocks = args.minTimeBetweenLocks
 
 if frequency >= timeUntilLock:
   print ("The time between face detection checks is bigger than the time "
@@ -78,7 +83,10 @@ def lockWhenFaceNotDetected(timeUntilLock, display=False):
       while not batteryStatus.isCharging():
         pass
     currentTime = time.time()
-    if (currentTime - lastTimeChecked > frequency):
+    # Do not check for a face in front of the screen if the screen was recently locked
+    if (currentTime - lastTimeLocked > minTimeBetweenLocks
+    # or if a face was detected recently
+        and currentTime - lastTimeChecked > frequency):
       frame = cv.QueryFrame(capture)
       if display:
         cv.ShowImage(WINDOW_NAME, frame)
@@ -88,8 +96,9 @@ def lockWhenFaceNotDetected(timeUntilLock, display=False):
       if faces:
         lastTimeDetected = currentTime
       else:
-        if (time.time() - lastTimeDetected > timeUntilLock):
+        if (currentTime - lastTimeDetected > timeUntilLock):
           print "no face found, locking screen"
+          lastTimeLocked = currentTime
           lockScreen.lockScreen()
       drawFaces(faces, frame)
 
