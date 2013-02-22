@@ -97,7 +97,7 @@ def lockWhenFaceNotDetected(timeUntilLock, display=False):
       if faces:
         lastTimeDetected = currentTime
       else:
-        if (currentTime - lastTimeDetected > timeUntilLock):
+        if currentTime - lastTimeDetected > timeUntilLock:
           lastTimeLocked = currentTime
           lockScreen.lockScreen()
       time.sleep(frequency)
