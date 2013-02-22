@@ -76,11 +76,10 @@ def lockWhenFaceNotDetected(timeUntilLock, display=False):
   capture = getCameraCapture()
   currentTime = time.time()
   lastTimeDetected = currentTime
-  lastTimeChecked = currentTime - frequency
   lastTimeLocked = currentTime - minTimeBetweenLocks
 
   while True:
-    # Unless the user specified otherwise, do not record while machine is not
+    # Unless the user specified otherwise, do not run while machine is not
     # not charging
     if not runWithDischargingBattery:
       while not batteryStatus.isCharging():
@@ -89,22 +88,19 @@ def lockWhenFaceNotDetected(timeUntilLock, display=False):
     # Do not check for a face in front of the screen if the screen was recently locked
     if currentTime - lastTimeLocked > minTimeBetweenLocks:
     # or if a face was detected recently
-      if currentTime - lastTimeChecked > frequency:
-        lastTimeChecked = currentTime
-        frame = cv.QueryFrame(capture)
-        if display:
-          cv.ShowImage(WINDOW_NAME, frame)
-          if cv.WaitKey(5) == 27:
-            break
-        faces = getFaces(frame)
-        if faces:
-          lastTimeDetected = currentTime
-        else:
-          if (currentTime - lastTimeDetected > timeUntilLock):
-            lastTimeLocked = currentTime
-            lockScreen.lockScreen()
+      frame = cv.QueryFrame(capture)
+      if display:
+        cv.ShowImage(WINDOW_NAME, frame)
+        if cv.WaitKey(5) == 27:
+          break
+      faces = getFaces(frame)
+      if faces:
+        lastTimeDetected = currentTime
       else:
-        time.sleep(frequency)
+        if (currentTime - lastTimeDetected > timeUntilLock):
+          lastTimeLocked = currentTime
+          lockScreen.lockScreen()
+      time.sleep(frequency)
 
 
 def main():
