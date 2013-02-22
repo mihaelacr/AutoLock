@@ -34,7 +34,7 @@ parser.add_argument("-frequency", type=float, default=TIME_BETWEEN_FACE_CHECKS,
                           "even though you are in front of the computer. "
                           "Default value %f seconds" %TIME_BETWEEN_FACE_CHECKS))
 parser.add_argument("-minTimeBetweenLocks", type=float, default=TIME_BETWEEN_LOCKS,
-                    help=("Minimal time in seconds between screen locks. "
+                    help=("Minimal time in seconds between screen locks."
                           "Default value %f seconds" %TIME_BETWEEN_LOCKS))
 
 
@@ -51,8 +51,8 @@ if frequency >= timeUntilLock:
          "of someone's presence in front of the screen.")
   print ("As a consequence, defaulting the time between face checks "
          "to half of the time until the screen is locked when no face is detected.")
-  frequency = timeUntilLock / 2
 
+frequency = timeUntilLock / 2
 
 # When user presses Control-C, gracefully exit program
 def signal_handler(signal, frame):
@@ -89,6 +89,7 @@ def lockWhenFaceNotDetected(timeUntilLock, display=False):
     if (currentTime - lastTimeLocked > minTimeBetweenLocks
     # or if a face was detected recently
         and currentTime - lastTimeChecked > frequency):
+      lastTimeChecked = currentTime
       frame = cv.QueryFrame(capture)
       if display:
         cv.ShowImage(WINDOW_NAME, frame)
