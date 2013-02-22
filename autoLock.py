@@ -15,6 +15,7 @@ DEFAULT_TIME_UNTIL_LOCK = 10
 WINDOW_NAME = "AutoLock"
 TIME_BETWEEN_FACE_CHECKS = 0.1
 TIME_BETWEEN_LOCKS = 100
+SLEEP_TIME_WHEN_NOT_CHARGING = 600
 
 parser = argparse.ArgumentParser(description=("Automatically lock your screen "
                                               "when not inin range"))
@@ -83,34 +84,34 @@ def lockWhenFaceNotDetected(timeUntilLock, display=False):
     # not charging
     if not runWithDischargingBattery:
       while not batteryStatus.isCharging():
-        pass
+        time.sleep(SLEEP_TIME_WHEN_NOT_CHARGING)
     currentTime = time.time()
     # Do not check for a face in front of the screen if the screen was recently locked
-    if (currentTime - lastTimeLocked > minTimeBetweenLocks
+    if currentTime - lastTimeLocked > minTimeBetweenLocks:
     # or if a face was detected recently
-        and currentTime - lastTimeChecked > frequency):
-      lastTimeChecked = currentTime
-      frame = cv.QueryFrame(capture)
-      if display:
-        cv.ShowImage(WINDOW_NAME, frame)
-        if cv.WaitKey(5) == 27:
-          break
-      faces = getFaces(frame)
-      if faces:
-        lastTimeDetected = currentTime
+      if currentTime - lastTimeChecked > frequency:
+        lastTimeChecked = currentTime
+        frame = cv.QueryFrame(capture)
+        if display:
+          cv.ShowImage(WINDOW_NAME, frame)
+          if cv.WaitKey(5) == 27:
+            break
+        faces = getFaces(frame)
+        if faces:
+          lastTimeDetected = currentTime
+        else:
+          if (currentTime - lastTimeDetected > timeUntilLock):
+            lastTimeLocked = currentTime
+            lockScreen.lockScreen()
       else:
-        if (currentTime - lastTimeDetected > timeUntilLock):
-          print "no face found, locking screen"
-          lastTimeLocked = currentTime
-          lockScreen.lockScreen()
-      drawFaces(faces, frame)
+        time.sleep(frequency)
 
 
 def main():
   global timeUntilLock
   if batteryStatus.isCharging() or runWithDischargingBattery:
     if runWithDischargingBattery:
-      print "You choose to run AutoLock with your laptop not plugged in"
+      print "You chose to run AutoLock with your laptop not plugged in"
       print "Be aware of your battery"
     if timeUntilLock < 1:
       print ("timeUntilLock has to be a positive integer, as it represents"
