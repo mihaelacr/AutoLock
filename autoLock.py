@@ -70,37 +70,67 @@ def getCameraCapture():
 
 
 def lockWhenFaceNotDetected(timeUntilLock, display=False):
-  if display:
-    cv.NamedWindow(WINDOW_NAME, cv.CV_WINDOW_AUTOSIZE)
+
+  def oneCycleFaceDetection(lastTimeLocked):
+    print "enters", lastTimeLocked
+    currentTime = time.time()
+    lastTimeDetected = currentTime
+    while currentTime - lastTimeDetected < timeUntilLock:
+        currentTime = time.time()
+        frame = cv.QueryFrame(capture)
+        if display:
+          cv.ShowImage(WINDOW_NAME, frame)
+          # TODO replace this with something better
+          if cv.WaitKey(1) == 27:
+            return lastTimeLocked
+        faces = getFaces(frame)
+        if faces:
+          lastTimeDetected = currentTime
+        time.sleep(frequency)
+    if currentTime - lastTimeLocked > minTimeBetweenLocks:
+      lastTimeLocked = currentTime
+      lockScreen.lockScreen()
+    print "returnign", lastTimeLocked
+    return lastTimeLocked
 
   capture = getCameraCapture()
   currentTime = time.time()
-  lastTimeDetected = currentTime
   lastTimeLocked = currentTime - minTimeBetweenLocks
+
+  if display:
+    cv.NamedWindow(WINDOW_NAME, cv.CV_WINDOW_AUTOSIZE)
+
+
+# if you the battery just started discharging, complete the current cycle
+# and then sleep (or just check for a face for 1 seconds at more frequent changes)
+# and then lock
+#  Note that currently people can put thesmelves in front of the camera,
+# so this is not a major issue, but it will become later when
+# the face recognition will work for the owner of the computer
+# A password should be then asked when the program is started such that
+# we avoid a foreigner getting the face recognized with it
+
+  # detectedDischargingBattery = -1
 
   while True:
     # Unless the user specified otherwise, do not run while machine is not
     # not charging
-    if not runWithDischargingBattery:
-      while not batteryStatus.isCharging():
-        time.sleep(SLEEP_TIME_WHEN_NOT_CHARGING)
     currentTime = time.time()
-    # Do not check for a face in front of the screen if the screen was recently locked
-    if currentTime - lastTimeLocked > minTimeBetweenLocks:
-    # or if a face was detected recently
-      frame = cv.QueryFrame(capture)
-      if display:
-        cv.ShowImage(WINDOW_NAME, frame)
-        if cv.WaitKey(5) == 27:
-          break
-      faces = getFaces(frame)
-      if faces:
-        lastTimeDetected = currentTime
-      else:
-        if currentTime - lastTimeDetected > timeUntilLock:
-          lastTimeLocked = currentTime
-          lockScreen.lockScreen()
-      time.sleep(frequency)
+
+    # if not runWithDischargingBattery:
+    #   if not batteryStatus.isCharging():
+    #     if detectedDischargingBattery > 0:
+    #       if currentTime - detectedDischargingBattery > timeUntilLock:
+    #         while not batteryStatus.isCharging():
+    #           time.sleep(SLEEP_TIME_WHEN_NOT_CHARGING)
+    #       else:
+    #         onceCycleFaceDetection(lastTimeDetected, lastTimeLocked)
+      #   else:
+      #     detectedDischargingBattery = currentTime
+      # else:
+      #   detectedDischargingBattery = -1
+
+    lastTimeLocked = oneCycleFaceDetection(lastTimeLocked)
 
 
 def main():
