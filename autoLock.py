@@ -80,9 +80,7 @@ def lockWhenFaceNotDetected(timeUntilLock, display=False):
         frame = cv.QueryFrame(capture)
         if display:
           cv.ShowImage(WINDOW_NAME, frame)
-          # TODO replace this with something better
-          if cv.WaitKey(1) == 27:
-            return lastTimeLocked
+          cv.WaitKey(100)
         faces = getFaces(frame)
         if faces:
           lastTimeDetected = currentTime
