@@ -71,7 +71,6 @@ def getCameraCapture():
 
 def lockWhenFaceNotDetected(timeUntilLock, display=False):
 
-# TODO migth have to add abck lastTimeDetected for continuity
   def oneCycleFaceDetection(lastTimeLocked):
     print "enters", lastTimeLocked
     currentTime = time.time()
@@ -125,7 +124,7 @@ def lockWhenFaceNotDetected(timeUntilLock, display=False):
     #         while not batteryStatus.isCharging():
     #           time.sleep(SLEEP_TIME_WHEN_NOT_CHARGING)
     #       else:
-    #         onceCycleFaceDetection(lastTimeDetected, lastTimeLocked)
+    #         onceCycleFaceDetection(lastTimeLocked)
       #   else:
       #     detectedDischargingBattery = currentTime
       # else:
