@@ -72,26 +72,33 @@ def getCameraCapture():
 def lockWhenFaceNotDetected(timeUntilLock, display=False):
 
   def oneCycleFaceDetection(lastTimeLocked):
-    print "enters", lastTimeLocked
+    capture = getCameraCapture()
     currentTime = time.time()
     lastTimeDetected = currentTime
+    batteryDischarging = -1
     while currentTime - lastTimeDetected < timeUntilLock:
-        currentTime = time.time()
-        frame = cv.QueryFrame(capture)
-        if display:
-          cv.ShowImage(WINDOW_NAME, frame)
-          cv.WaitKey(100)
-        faces = getFaces(frame)
-        if faces:
-          lastTimeDetected = currentTime
-        time.sleep(frequency)
+      currentTime = time.time()
+      if not batteryStatus.isCharging():
+        if batteryDischarging > 0:
+          if currentTime - batteryDischarging > timeUntilLock:
+            break
+        else:
+          batteryDischarging = currentTime
+      else:
+        batteryDischarging = -1
+      frame = cv.QueryFrame(capture)
+      if display:
+        cv.ShowImage(WINDOW_NAME, frame)
+        cv.WaitKey(100)
+      faces = getFaces(frame)
+      if faces:
+        lastTimeDetected = currentTime
+      time.sleep(frequency)
     if currentTime - lastTimeLocked > minTimeBetweenLocks:
       lastTimeLocked = currentTime
       lockScreen.lockScreen()
-    print "returnign", lastTimeLocked
     return lastTimeLocked
 
-  capture = getCameraCapture()
   currentTime = time.time()
   lastTimeLocked = currentTime - minTimeBetweenLocks
 
@@ -108,25 +115,15 @@ def lockWhenFaceNotDetected(timeUntilLock, display=False):
 # A password should be then asked when the program is started such that
 # we avoid a foreigner getting the face recognized with it
 
-  # detectedDischargingBattery = -1
 
   while True:
     # Unless the user specified otherwise, do not run while machine is not
     # not charging
     currentTime = time.time()
 
-    # if not runWithDischargingBattery:
-    #   if not batteryStatus.isCharging():
-    #     if detectedDischargingBattery > 0:
-    #       if currentTime - detectedDischargingBattery > timeUntilLock:
-    #         while not batteryStatus.isCharging():
-    #           time.sleep(SLEEP_TIME_WHEN_NOT_CHARGING)
-    #       else:
-    #         onceCycleFaceDetection(lastTimeLocked)
-      #   else:
-      #     detectedDischargingBattery = currentTime
-      # else:
-      #   detectedDischargingBattery = -1
+    while not batteryStatus.isCharging():
+      print "sleeping"
+      time.sleep(SLEEP_TIME_WHEN_NOT_CHARGING)
 
     lastTimeLocked = oneCycleFaceDetection(lastTimeLocked)
 
