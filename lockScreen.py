@@ -2,7 +2,7 @@ import subprocess
 
 def lockScreen():
   try:
-    subprocess.check_call(["gnome-screensaver-commandbla", "--lock"])
+    subprocess.check_call(["gnome-screensaver-command", "--lock"])
   except (subprocess.CalledProcessError, OSError):
     subprocess.call(["slock"])
 
