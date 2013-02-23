@@ -15,7 +15,7 @@ DEFAULT_TIME_UNTIL_LOCK = 10
 WINDOW_NAME = "AutoLock"
 TIME_BETWEEN_FACE_CHECKS = 0.1
 TIME_BETWEEN_LOCKS = 100
-SLEEP_TIME_WHEN_NOT_CHARGING = 600
+SLEEP_TIME_WHEN_NOT_CHARGING = 600  # 10 minutes
 
 parser = argparse.ArgumentParser(description=("Automatically lock your screen "
                                               "when not inin range"))
