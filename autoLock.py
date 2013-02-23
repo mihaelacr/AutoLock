@@ -71,6 +71,7 @@ def getCameraCapture():
 
 def lockWhenFaceNotDetected(timeUntilLock, display=False):
 
+# TODO migth have to add abck lastTimeDetected for continuity
   def oneCycleFaceDetection(lastTimeLocked):
     print "enters", lastTimeLocked
     currentTime = time.time()
