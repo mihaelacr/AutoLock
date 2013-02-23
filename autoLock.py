@@ -78,14 +78,15 @@ def lockWhenFaceNotDetected(timeUntilLock, display=False):
     batteryDischarging = -1
     while currentTime - lastTimeDetected < timeUntilLock:
       currentTime = time.time()
-      if not batteryStatus.isCharging():
-        if batteryDischarging > 0:
-          if currentTime - batteryDischarging > timeUntilLock:
-            break
+      if not runWithDischargingBattery:
+        if not batteryStatus.isCharging():
+          if batteryDischarging > 0:
+            if currentTime - batteryDischarging > timeUntilLock:
+              break
+          else:
+            batteryDischarging = currentTime
         else:
-          batteryDischarging = currentTime
-      else:
-        batteryDischarging = -1
+          batteryDischarging = -1
       frame = cv.QueryFrame(capture)
       if display:
         cv.ShowImage(WINDOW_NAME, frame)
@@ -120,10 +121,9 @@ def lockWhenFaceNotDetected(timeUntilLock, display=False):
     # Unless the user specified otherwise, do not run while machine is not
     # not charging
     currentTime = time.time()
-
-    while not batteryStatus.isCharging():
-      print "sleeping"
-      time.sleep(SLEEP_TIME_WHEN_NOT_CHARGING)
+    if not runWithDischargingBattery:
+      while not batteryStatus.isCharging():
+        time.sleep(SLEEP_TIME_WHEN_NOT_CHARGING)
 
     lastTimeLocked = oneCycleFaceDetection(lastTimeLocked)
 
