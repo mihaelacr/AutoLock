@@ -67,8 +67,8 @@ def showFrame(frame):
 
 def destroyWindow():
   cv.DestroyWindow(WINDOW_NAME)
-  cv.WaitKey(1)
   cv.ShowImage(WINDOW_NAME, None)
+  cv.WaitKey(1)
 
 
 def oneCycleFaceDetection(lastTimeLocked, display):
