@@ -18,3 +18,6 @@ and if it sees there is no need to lock, then disable
 
 
  use facerec to detect your actual face
+
+# A password should be then asked when the program is started such that
+# we avoid a foreigner getting the face recognized with it
