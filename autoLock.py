@@ -46,14 +46,6 @@ timeUntilLock = args.timeUntilLock
 frequency = args.frequency
 minTimeBetweenLocks = args.minTimeBetweenLocks
 
-if frequency >= timeUntilLock:
-  print ("The time between face detection checks is bigger than the time "
-         "until lock. This would result in locking the screen regardless "
-         "of someone's presence in front of the screen.")
-  print ("As a consequence, defaulting the time between face checks "
-         "to half of the time until the screen is locked when no face is detected.")
-
-frequency = timeUntilLock / 2
 
 # When user presses Control-C, gracefully exit program
 def signal_handler(signal, frame):
@@ -68,68 +60,78 @@ def getCameraCapture():
   # -1 is supposed to detected any webcam connected to the device
     return cv.CaptureFromCAM(-1)
 
+def showFrame(frame):
+  cv.ShowImage(WINDOW_NAME, frame)
+  cv.WaitKey(100)
+
+
+def destroyWindow():
+  cv.DestroyWindow(WINDOW_NAME)
+  cv.WaitKey(1)
+  cv.ShowImage(WINDOW_NAME, None)
+
+
+def oneCycleFaceDetection(lastTimeLocked, display):
+  capture = getCameraCapture()
+  currentTime = time.time()
+  lastTimeDetected = currentTime
+  batteryDischarging = -1
+
+  while currentTime - lastTimeDetected < timeUntilLock:
+    currentTime = time.time()
+    if not runWithDischargingBattery:
+      if not batteryStatus.isCharging():
+        if batteryDischarging > 0:
+          if currentTime - batteryDischarging > timeUntilLock:
+            break
+        else:
+          batteryDischarging = currentTime
+      else:
+        batteryDischarging = -1
+    frame = cv.QueryFrame(capture)
+    if display:
+      showFrame(frame)
+    faces = getFaces(frame)
+    if faces:
+      lastTimeDetected = currentTime
+    time.sleep(frequency)
+
+  if currentTime - lastTimeLocked > minTimeBetweenLocks:
+    lockScreen.lockScreen()
+
+  return lastTimeLocked
+
 
 def lockWhenFaceNotDetected(timeUntilLock, display=False):
-
-  def oneCycleFaceDetection(lastTimeLocked):
-    capture = getCameraCapture()
-    currentTime = time.time()
-    lastTimeDetected = currentTime
-    batteryDischarging = -1
-    while currentTime - lastTimeDetected < timeUntilLock:
-      currentTime = time.time()
-      if not runWithDischargingBattery:
-        if not batteryStatus.isCharging():
-          if batteryDischarging > 0:
-            if currentTime - batteryDischarging > timeUntilLock:
-              break
-          else:
-            batteryDischarging = currentTime
-        else:
-          batteryDischarging = -1
-      frame = cv.QueryFrame(capture)
-      if display:
-        cv.ShowImage(WINDOW_NAME, frame)
-        cv.WaitKey(100)
-      faces = getFaces(frame)
-      if faces:
-        lastTimeDetected = currentTime
-      time.sleep(frequency)
-    if currentTime - lastTimeLocked > minTimeBetweenLocks:
-      lastTimeLocked = currentTime
-      lockScreen.lockScreen()
-    return lastTimeLocked
-
-  currentTime = time.time()
-  lastTimeLocked = currentTime - minTimeBetweenLocks
+  lastTimeLocked = time.time() - minTimeBetweenLocks
 
   if display:
     cv.NamedWindow(WINDOW_NAME, cv.CV_WINDOW_AUTOSIZE)
 
-
-# if you the battery just started discharging, complete the current cycle
-# and then sleep (or just check for a face for 1 seconds at more frequent changes)
-# and then lock
-#  Note that currently people can put thesmelves in front of the camera,
-# so this is not a major issue, but it will become later when
-# the face recognition will work for the owner of the computer
-# A password should be then asked when the program is started such that
-# we avoid a foreigner getting the face recognized with it
-
-
   while True:
     # Unless the user specified otherwise, do not run while machine is not
     # not charging
-    currentTime = time.time()
     if not runWithDischargingBattery:
+      if display:
+        destroyWindow()
       while not batteryStatus.isCharging():
         time.sleep(SLEEP_TIME_WHEN_NOT_CHARGING)
 
-    lastTimeLocked = oneCycleFaceDetection(lastTimeLocked)
+    lastTimeLocked = oneCycleFaceDetection(lastTimeLocked, display)
 
 
 def main():
   global timeUntilLock
+  global frequency
+
+  if frequency >= timeUntilLock:
+    print ("The time between face detection checks is bigger than the time "
+         "until lock. This would result in locking the screen regardless "
+         "of someone's presence in front of the screen.")
+    print ("As a consequence, defaulting the time between face checks "
+         "to half of the time until the screen is locked when no face is detected.")
+    frequency = timeUntilLock / 2
+
   if batteryStatus.isCharging() or runWithDischargingBattery:
     if runWithDischargingBattery:
       print "You chose to run AutoLock with your laptop not plugged in"
