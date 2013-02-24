@@ -64,7 +64,7 @@ def showFrame(frame):
   cv.ShowImage(WINDOW_NAME, frame)
   cv.WaitKey(100)
 
-
+# Currently does not destroy window due to OpenCV issues
 def destroyWindow():
   cv.DestroyWindow(WINDOW_NAME)
   cv.ShowImage(WINDOW_NAME, None)
