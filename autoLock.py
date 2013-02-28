@@ -1,9 +1,8 @@
 import argparse
-import cv
+import cv2
 import signal
 import sys
 import time
-
 
 from faceRecognition import *
 import batteryStatus
@@ -47,6 +46,7 @@ frequency = args.frequency
 minTimeBetweenLocks = args.minTimeBetweenLocks
 
 
+
 # When user presses Control-C, gracefully exit program
 def signal_handler(signal, frame):
   print "AutoLock will terminate."
@@ -57,18 +57,17 @@ signal.signal(signal.SIGINT, signal_handler)
 
 def getCameraCapture():
   with ignoreoutput.suppress_stdout_stderr():
-  # -1 is supposed to detected any webcam connected to the device
-    return cv.CaptureFromCAM(-1)
+  # 0 is supposed to detected any webcam connected to the device
+    return cv2.VideoCapture(0)
 
 def showFrame(frame):
-  cv.ShowImage(WINDOW_NAME, frame)
-  cv.WaitKey(100)
+  cv2.imshow(WINDOW_NAME, frame)
+  cv2.waitKey(100)
 
 # Currently does not destroy window due to OpenCV issues
 def destroyWindow():
-  cv.DestroyWindow(WINDOW_NAME)
-  cv.ShowImage(WINDOW_NAME, None)
-  cv.WaitKey(1)
+  cv2.destroyWindow(WINDOW_NAME)
+  cv2.waitKey(1)
 
 
 def oneCycleFaceDetection(lastTimeLocked, display):
@@ -88,12 +87,17 @@ def oneCycleFaceDetection(lastTimeLocked, display):
           batteryDischarging = currentTime
       else:
         batteryDischarging = -1
-    frame = cv.QueryFrame(capture)
-    if display:
-      showFrame(frame)
-    faces = getFaces(frame)
-    if faces:
-      lastTimeDetected = currentTime
+    flag, frame = capture.read()
+    # Not sure if there is an error from the cam if we should lock the screen
+    if flag:
+      if display:
+        showFrame(frame)
+      faces = getFaces(frame)
+      if faces:
+        lastTimeDetected = currentTime
+    else:
+        lastTimeDetected = currentTime
+
     time.sleep(frequency)
 
   if currentTime - lastTimeLocked > minTimeBetweenLocks:
@@ -106,13 +110,14 @@ def lockWhenFaceNotDetected(timeUntilLock, display=False):
   lastTimeLocked = time.time() - minTimeBetweenLocks
 
   if display:
-    cv.NamedWindow(WINDOW_NAME, cv.CV_WINDOW_AUTOSIZE)
+    # cv2.StartWindowThread()
+    cv2.namedWindow(WINDOW_NAME, cv2.CV_WINDOW_AUTOSIZE)
 
   while True:
     # Unless the user specified otherwise, do not run while machine is not
     # not charging
     if not runWithDischargingBattery:
-      if display:
+      if display and not batteryStatus.isCharging():
         destroyWindow()
       while not batteryStatus.isCharging():
         time.sleep(SLEEP_TIME_WHEN_NOT_CHARGING)
@@ -123,7 +128,6 @@ def lockWhenFaceNotDetected(timeUntilLock, display=False):
 def main():
   global timeUntilLock
   global frequency
-
   if frequency >= timeUntilLock:
     print ("The time between face detection checks is bigger than the time "
          "until lock. This would result in locking the screen regardless "
