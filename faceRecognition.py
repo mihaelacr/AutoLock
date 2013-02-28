@@ -1,33 +1,24 @@
-import cv
-
-imageName = "ela.jpg"
-image = cv.LoadImage(imageName)
+import cv2
 
 # Create window for image display
-windowName = "openCVwindow"
-
+CASCADE_FN = "haarcascade_frontalface_default.xml"
 
 def getFaces(image):
-  storage = cv.CreateMemStorage()
-  haar=cv.Load('haarcascade_frontalface_default.xml')
-
-  #  A list of all faces detected in the picture
-  # A face is represented by a rectange (x, y, w, h) and (strongness of face)
-  detectedFaces = cv.HaarDetectObjects(image, haar, storage, 1.2, 2,cv.CV_HAAR_DO_CANNY_PRUNING, (100,100))
-  return detectedFaces
+  cascade = cv2.CascadeClassifier(CASCADE_FN)
+  img_copy = cv2.resize(image, (image.shape[1]/2, image.shape[0]/2))
+  gray = cv2.cvtColor(img_copy, cv2.COLOR_BGR2GRAY)
+  gray = cv2.equalizeHist(gray)
+  rects = cascade.detectMultiScale(gray)
+  return list(rects)
 
 def drawFaces(faces, image):
-  # n is the number of neighbours which are used to create the face
-  for (x, y, w, h), n in faces:
-    cv.Rectangle(image, (x,y), (x + w, y + h), cv.RGB(255, 0, 0), thickness=5)
+  for (x, y, w, h) in faces:
+    cv2.rectangle(image, (x,y), (x + w, y + h), cv2.RGB(255, 0, 0), thickness=5)
 
 def getAndDisplayFaces(windowName, image, waitingTime=1000):
-  cv.NamedWindow(windowName, cv.CV_WINDOW_AUTOSIZE)
+  cv2.namedWindow(windowName, cv2.CV_WINDOW_AUTOSIZE)
   faces = getFaces(image)
   drawFaces(faces, image)
-  cv.ShowImage(windowName, image)
-  cv.WaitKey(waitingTime)
-  cv.SaveImage("withDetected.jpg", image)
-
-if __name__ == '__main__':
-  getAndDisplayFaces(windowName, image)
+  cv2.imshow(windowName, image)
+  cv2.waitKey(waitingTime)
+  cv2.imsave("withDetected.jpg", image)
