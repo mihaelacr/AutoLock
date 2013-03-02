@@ -69,7 +69,6 @@ def destroyWindow():
   cv2.destroyWindow(WINDOW_NAME)
   cv2.waitKey(1)
 
-
 def oneCycleFaceDetection(lastTimeLocked, display):
   capture = getCameraCapture()
   currentTime = time.time()
@@ -110,7 +109,7 @@ def lockWhenFaceNotDetected(timeUntilLock, display=False):
   lastTimeLocked = time.time() - minTimeBetweenLocks
 
   if display:
-    # cv2.StartWindowThread()
+    cv2.startWindowThread()
     cv2.namedWindow(WINDOW_NAME, cv2.CV_WINDOW_AUTOSIZE)
 
   while True:
