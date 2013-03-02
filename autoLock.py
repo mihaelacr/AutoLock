@@ -92,7 +92,8 @@ def detectedAndDisplayFaces(capture, display=False, drawFaces=False):
 
 
 # Draw faces argument is only taken into account if display was set as true.
-def oneCycleFaceDetection(lastTimeLocked, display=False, drawFaces=False):
+def oneCycleFaceDetection(lastTimeLocked, frequency,
+                          display=False, drawFaces=False):
   capture = getCameraCapture()
   currentTime = time.time()
   lastTimeDetected = currentTime
@@ -121,7 +122,7 @@ def oneCycleFaceDetection(lastTimeLocked, display=False, drawFaces=False):
   return lastTimeLocked
 
 
-def lockWhenFaceNotDetected(timeUntilLock, display=False, drawFaces=False):
+def lockWhenFaceNotDetected(timeUntilLock, frequency, display=False, drawFaces=False):
   lastTimeLocked = time.time() - minTimeBetweenLocks
 
   if display:
@@ -137,7 +138,7 @@ def lockWhenFaceNotDetected(timeUntilLock, display=False, drawFaces=False):
       while not batteryStatus.isCharging():
         time.sleep(SLEEP_TIME_WHEN_NOT_CHARGING)
 
-    lastTimeLocked = oneCycleFaceDetection(lastTimeLocked, display, drawFaces)
+    lastTimeLocked = oneCycleFaceDetection(lastTimeLocked, frequency, display, drawFaces)
 
 
 def main():
@@ -166,7 +167,7 @@ def main():
              "screen gets locked")
       print "Defaulting to %d seconds" %(DEFAULT_TIME_UNTIL_LOCK)
       timeUntilLock = DEFAULT_TIME_UNTIL_LOCK
-    lockWhenFaceNotDetected(timeUntilLock, showCam, displayFaces)
+    lockWhenFaceNotDetected(timeUntilLock, frequency, showCam, displayFaces)
   else:
     print "Your machine is not charging, AutoLock will not execute"
 
