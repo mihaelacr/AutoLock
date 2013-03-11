@@ -1,14 +1,21 @@
+import subprocess
 
-BATTERY_STATUS_FILE = "/proc/acpi/battery/BAT0/state"
+PATH_TO_BATTERY_INFO = "/proc/acpi/battery/"
 
 CHARGING_KEY = "charging state"
 DISCHARGING = "discharging"
 
 
+def getBatteryStatusFile():
+  ls_output = subprocess.check_output(["ls", PATH_TO_BATTERY_INFO])
+  files = ls_output.split()
+  return PATH_TO_BATTERY_INFO + files[0] + "/state"
+
+
 def parseBatteryStatusFile(statFile=None):
   batteryStatus = {}
   if not statFile:
-    statFile = BATTERY_STATUS_FILE
+    statFile = getBatteryStatusFile()
   with open(statFile, "r") as f:
     for line in f:
       key, value = line.split(":")[0:2]
