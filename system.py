@@ -16,7 +16,7 @@ class UnsupportedOsException(Exception):
   def __init__(self, os):
     self.message = "AutoLock: Unsupported OS %s" % os
 
-def lockScreen(self):
+def lockScreen():
   os = getOS()
   if os == LINUX:
     try:
