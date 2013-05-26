@@ -5,9 +5,8 @@ import sys
 import time
 
 from faceRecognition import *
-import batteryStatus
 import ignoreoutput
-import lockScreen
+import system
 
 
 DEFAULT_TIME_UNTIL_LOCK = 10
@@ -102,7 +101,7 @@ def oneCycleFaceDetection(lastTimeLocked, frequency,
   while currentTime - lastTimeDetected < timeUntilLock:
     currentTime = time.time()
     if not runWithDischargingBattery:
-      if not batteryStatus.isCharging():
+      if not system.isCharging():
         if batteryDischarging > 0:
           if currentTime - batteryDischarging > timeUntilLock:
             break
@@ -117,7 +116,7 @@ def oneCycleFaceDetection(lastTimeLocked, frequency,
     time.sleep(frequency)
 
   if currentTime - lastTimeLocked > minTimeBetweenLocks:
-    lockScreen.lockScreen()
+    system.lockScreen()
 
   return lastTimeLocked
 
@@ -133,9 +132,9 @@ def lockWhenFaceNotDetected(timeUntilLock, frequency, display=False, drawFaces=F
     # Unless the user specified otherwise, do not run while machine is not
     # not charging
     if not runWithDischargingBattery:
-      if display and not batteryStatus.isCharging():
+      if display and not system.isCharging():
         destroyWindow()
-      while not batteryStatus.isCharging():
+      while not system.isCharging():
         time.sleep(SLEEP_TIME_WHEN_NOT_CHARGING)
 
     lastTimeLocked = oneCycleFaceDetection(lastTimeLocked, frequency, display, drawFaces)
@@ -157,7 +156,7 @@ def main():
   else:
     showCam = displayCam
 
-  if batteryStatus.isCharging() or runWithDischargingBattery:
+  if system.isCharging() or runWithDischargingBattery:
     if runWithDischargingBattery:
       print "You chose to run AutoLock with your laptop not plugged in"
       print "Be aware of your battery"

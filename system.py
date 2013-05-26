@@ -9,6 +9,7 @@ PATH_TO_BATTERY_INFO_LINUX = "/proc/acpi/battery/"
 
 CHARGING_KEY_LINUX = "charging state"
 DISCHARGING_LINUX = "discharging"
+DISCHARGING_MAC = "No adapter attached"
 
 class UnsupportedOsException(Exception):
 
@@ -51,7 +52,11 @@ def isCharging():
     batteryStatus = parseBatteryStatusFileLinux()
     return batteryStatus[CHARGING_KEY_LINUX] != DISCHARGING_LINUX
   elif os == MAC:
-    pass
+     batteryStatus = subprocess.check_output(["pmset", "-g", "adapter"])
+     if batteryStatus.find(DISCHARGING_MAC) == -1:
+       return True
+     else:
+       return False
 
 
 def isSupportedOS(os):
