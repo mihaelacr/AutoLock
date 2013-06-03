@@ -46,6 +46,8 @@ def getNegativeExamples():
  # The reason for this choice is to increase the accuracy for training
  # while ensuring compatibility with all possible current users
  onlyfiles = [ f for f in os.listdir(NEGATIVE_EXAMPLES_PATH) if os.path.isfile(os.path.join(NEGATIVE_EXAMPLES_PATH, f)) ]
+ # TODO see if there is any point in keeping the image coloured
+ return map(lambda x: cv2.imread(x, cv2.CV_LOAD_IMAGE_COLOR), onlyfiles)
 
 def createFaceModel(positives, negatives):
   # make all the pictures black and white for recognition
