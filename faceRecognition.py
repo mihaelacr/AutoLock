@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import os
 
 # Create window for image display
 CASCADE_FN = "haarcascade_frontalface_default.xml"
@@ -10,6 +11,8 @@ CASCADE_FN = "haarcascade_frontalface_default.xml"
 RESIZE_SCALE = 3
 RECTANGE_COLOUR = (255, 0, 0)
 THICKNESS = 2
+
+NEGATIVE_EXAMPLES_PATH = "negativeExamples"
 
 def getFaces(image):
   cascade = cv2.CascadeClassifier(CASCADE_FN)
@@ -37,3 +40,26 @@ def getAndDrawFaces(image, display=False):
   faces = getFaces(image)
   if display:
     drawFaces(image, faces)
+
+def getNegativeExamples():
+ # Note: these are examples of deceased famous people
+ # The reason for this choice is to increase the accuracy for training
+ # while ensuring compatibility with all possible current users
+ onlyfiles = [ f for f in os.listdir(NEGATIVE_EXAMPLES_PATH) if os.path.isfile(os.path.join(NEGATIVE_EXAMPLES_PATH, f)) ]
+
+def createFaceModel(positives, negatives):
+  # make all the pictures black and white for recognition
+  model = cv2.createEigenFaceRecognizer()
+  images = positives + negatives
+  images = map(normalizeImage, images)
+  labels = len(positives) * 1 + len(negatives) * 0
+  model.train(images, lables)
+  return model
+
+def isPositiveFace(image, model):
+  return model.predict(image)[0] == 1
+
+def normalizeImage(img):
+   gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+   return cv2.equalizeHist(gray)
+
