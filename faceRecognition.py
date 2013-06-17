@@ -14,13 +14,12 @@ THICKNESS = 2
 
 NEGATIVE_EXAMPLES_PATH = "negativeExamples"
 
+CASCADE_CLASSIFIER = cv2.CascadeClassifier(CASCADE_FN)
+
 def getFaces(image):
-  cascade = cv2.CascadeClassifier(CASCADE_FN)
   img_copy = cv2.resize(image, (image.shape[1]/RESIZE_SCALE,
                                 image.shape[0]/RESIZE_SCALE))
-  gray = cv2.cvtColor(img_copy, cv2.COLOR_BGR2GRAY)
-  gray = cv2.equalizeHist(gray)
-  rects = cascade.detectMultiScale(gray)
+  rects = CASCADE_CLASSIFIER.detectMultiScale(normalizeImage(img_copy))
   resized_rects = []
   for r in rects:
     new_r = map((lambda x: RESIZE_SCALE * x), r)
@@ -61,6 +60,7 @@ def createFaceModel(positives, negatives):
 def isPositiveFace(image, model):
   return model.predict(image)[0] == 1
 
+# TODO: resize here?
 def normalizeImage(img):
    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
    return cv2.equalizeHist(gray)
