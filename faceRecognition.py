@@ -26,13 +26,14 @@ def getFaces(image):
     resized_rects += [new_r]
   return resized_rects
 
-
 def getCroppedImages(image, rects):
  # TODO check coordinates
  def crop(r):
    return image[r[0]:r[1], r[2]:r[3]]
  return map(crop, rects)
 
+def getCroppedFaces(image):
+   return getCroppedImages(image, getFaces(image))
 
 def drawFaces(image, faces):
   for f in faces:
@@ -61,7 +62,7 @@ def createFaceModel(positives, negatives):
   model = cv2.createEigenFaceRecognizer()
   images = positives + negatives
   images = map(normalizeImage, images)
-  labels = len(positives) * 1 + len(negatives) * 0
+  labels = len(positives) * [1] + len(negatives) * [0]
   model.train(images, lables)
   return model
 
@@ -69,7 +70,7 @@ def containsPositiveFace(image, model, faces=None):
    # It is enough that one of the faces in the image is recognized as positive
    if faces == None:
      faces = getFaces(image)
-   faces = getCroppedImages(getFaces(image))
+   faces = getCroppedImages(image, faces)
    return any(lambda x: model.predict(x)[0] == 1, faces)
 
 # TODO: resize here?

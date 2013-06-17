@@ -1,3 +1,4 @@
+from itertools import chain, imap
 import argparse
 import cv2
 import signal
@@ -66,6 +67,14 @@ def getCameraCapture():
   # 0 is supposed to detected any webcam connected to the device
     return cv2.VideoCapture(0)
 
+def getImagesFromCamera():
+   def getCaptureAndSleep():
+    img = getCameraCaputre()
+    time.sleep(1000ms)
+    return img
+   return map(getCaptureAndSleep, 100 * [1])
+
+
 
 def showFrame(frame, faces, draw=False):
   if draw:
@@ -91,7 +100,6 @@ def detectedAndDisplayFaces(capture, display=False, drawFaces=False):
       return True
   else:
     return True
-
 
 # Draw faces argument is only taken into account if display was set as true.
 def oneCycleFaceDetection(lastTimeLocked, frequency,
@@ -123,8 +131,7 @@ def oneCycleFaceDetection(lastTimeLocked, frequency,
 
   return lastTimeLocked
 
-
-def lockWhenFaceNotDetected(timeUntilLock, frequency, display=False, drawFaces=False):
+def lockWhenFaceNotDetected(timeUntilLock, frequency, display=False, drawFaces=False, model=None):
   lastTimeLocked = time.time() - minTimeBetweenLocks
 
   if display:
@@ -142,6 +149,8 @@ def lockWhenFaceNotDetected(timeUntilLock, frequency, display=False, drawFaces=F
 
     lastTimeLocked = oneCycleFaceDetection(lastTimeLocked, frequency, display, drawFaces)
 
+def concatMap(f, it):
+   return chain.from_iterable(imap(func, it))
 
 def main():
   global timeUntilLock
@@ -169,7 +178,17 @@ def main():
              "screen gets locked")
       print "Defaulting to %d seconds" %(DEFAULT_TIME_UNTIL_LOCK)
       timeUntilLock = DEFAULT_TIME_UNTIL_LOCK
-    lockWhenFaceNotDetected(timeUntilLock, frequency, showCam, displayFaces)
+  
+    if oneFace:
+      print "The screen will get locked when your face is not present. Stay in front of the camera for a while"
+      # save imgaes and train model with them
+      negatives = concatMap(getCroppedFaces, getNegatives())
+      positives = concatMap(getCroppedFaces, getImagesFromCamera())
+      model = createFaceModel(positives, negatives) 
+   else:
+       # Do not train a model for face recognition
+       model = None
+    lockWhenFaceNotDetected(timeUntilLock, frequency, showCam, displayFaces, model)
   else:
     print "Your machine is not charging, AutoLock will not execute"
 
