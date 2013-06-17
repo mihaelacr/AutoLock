@@ -65,8 +65,10 @@ def createFaceModel(positives, negatives):
   model.train(images, lables)
   return model
 
-def containsPositiveFace(image, model):
+def containsPositiveFace(image, model, faces=None):
    # It is enough that one of the faces in the image is recognized as positive
+   if faces == None:
+     faces = getFaces(image)
    faces = getCroppedImages(getFaces(image))
    return any(lambda x: model.predict(x)[0] == 1, faces)
 
