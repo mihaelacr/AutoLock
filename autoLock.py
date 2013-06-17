@@ -26,6 +26,9 @@ parser.add_argument("--seeFaces", action='store_const', const=True,
                     help=("If passed as argument, the webcam image will show the "
                           "detected faces. Note that this automatically ensures "
                           "that the camera will be displayed."))
+parser.add_argument("--myFace", action="store_const", const=True,
+                     help=("If true, only recognizes the face of the person initially"
+                            "sitting in front of the computer.")
 parser.add_argument("-timeUntilLock", type=int, default=DEFAULT_TIME_UNTIL_LOCK,
                     help=("Time in seconds since the last time a face is detected"
                           "to the time the screen is locked. "
@@ -48,7 +51,7 @@ timeUntilLock = args.timeUntilLock
 frequency = args.frequency
 minTimeBetweenLocks = args.minTimeBetweenLocks
 displayFaces = args.seeFaces
-
+oneFace  = args.myFace
 
 # When user presses Control-C, gracefully exit program
 def signal_handler(signal, frame):
