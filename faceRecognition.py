@@ -26,6 +26,14 @@ def getFaces(image):
     resized_rects += [new_r]
   return resized_rects
 
+
+def getCroppedImages(image, rects):
+ # TODO check coordinates
+ def crop(r):
+   return image[r[0]:r[1], r[2]:r[3]]
+ return map(crop, rects)
+
+
 def drawFaces(image, faces):
   for f in faces:
     x = f[0]
