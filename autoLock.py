@@ -29,7 +29,7 @@ parser.add_argument("--seeFaces", action='store_const', const=True,
                           "that the camera will be displayed."))
 parser.add_argument("--myFace", action="store_const", const=True,
                      help=("If true, only recognizes the face of the person initially"
-                            "sitting in front of the computer.")
+                            "sitting in front of the computer."))
 parser.add_argument("-timeUntilLock", type=int, default=DEFAULT_TIME_UNTIL_LOCK,
                     help=("Time in seconds since the last time a face is detected"
                           "to the time the screen is locked. "
@@ -70,7 +70,7 @@ def getCameraCapture():
 def getImagesFromCamera():
    def getCaptureAndSleep():
     img = getCameraCaputre()
-    time.sleep(1000ms)
+    time.sleep(1000)
     return img
    return map(getCaptureAndSleep, 100 * [1])
 
@@ -178,14 +178,13 @@ def main():
              "screen gets locked")
       print "Defaulting to %d seconds" %(DEFAULT_TIME_UNTIL_LOCK)
       timeUntilLock = DEFAULT_TIME_UNTIL_LOCK
-  
     if oneFace:
       print "The screen will get locked when your face is not present. Stay in front of the camera for a while"
       # save imgaes and train model with them
       negatives = concatMap(getCroppedFaces, getNegatives())
       positives = concatMap(getCroppedFaces, getImagesFromCamera())
-      model = createFaceModel(positives, negatives) 
-   else:
+      model = createFaceModel(positives, negatives)
+    else:
        # Do not train a model for face recognition
        model = None
     lockWhenFaceNotDetected(timeUntilLock, frequency, showCam, displayFaces, model)
